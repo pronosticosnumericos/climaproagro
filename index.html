@@ -89,6 +89,10 @@
         <label for="locSearch">Buscar:</label>
         <input id="locSearch" type="text" placeholder="Escribe municipio/localidad… (filtra la lista)" />
       </div>
+            <div class="field">
+        <label for="stateSelect">Estado:</label>
+        <select id="stateSelect" aria-label="Estado" ></select>
+      </div>
       <div class="field">
         <label for="locSelect">Localidad:</label>
         <select id="locSelect" aria-label="Localidad o municipio de interés"></select>
@@ -122,45 +126,45 @@
     </section>
   </main>
 
-  <footer role="contentinfo">&copy; 2025 Weather Research & Forecast</footer>
+  <footer role="contentinfo">&copy; 2025 ClimaproAgro</footer>
 
   <script>
     // ==============================
     // 0) Catálogo de localidades (reemplaza con tu lista real)
     // ==============================
     const LOCS = [
-      { id: "VER-N01", name: "Tuxpan",               lat: 20.956,  lon: -97.406 },
-      { id: "VER-N02", name: "Poza Rica",            lat: 20.533,  lon: -97.459 },
-      { id: "VER-N03", name: "Papantla",             lat: 20.446,  lon: -97.318 },
-      { id: "VER-N04", name: "Tihuatlán",            lat: 20.714,  lon: -97.475 },
-      { id: "VER-N05", name: "Tecolutla",            lat: 20.483,  lon: -97.005 },
-      { id: "VER-N06", name: "Nautla",               lat: 20.215,  lon: -96.781 },
-      { id: "VER-N07", name: "Martínez de la Torre", lat: 20.065,  lon: -97.056 },
-      { id: "VER-N08", name: "Tlapacoyan",           lat: 19.973,  lon: -97.212 },
-      { id: "VER-N09", name: "Misantla",             lat: 19.928,  lon: -96.851 },
-      { id: "VER-N10", name: "Tantoyuca",            lat: 21.350,  lon: -98.225 },
-      { id: "VER-N11", name: "Pánuco",               lat: 22.053,  lon: -98.182 },
-      { id: "VER-N12", name: "Naranjos",             lat: 21.353,  lon: -97.679 },
-      { id: "VER-C01", name: "Xalapa",               lat: 19.5438, lon: -96.9103 },
-      { id: "VER-C02", name: "Boca del Río",         lat: 19.106,  lon: -96.106 },
-      { id: "VER-C03", name: "Orizaba",              lat: 18.851,  lon: -97.099 },
-      { id: "VER-C04", name: "Córdoba",              lat: 18.8854, lon: -96.9310 },
-      // --- Complejo Necaxa / Tecolutla ---
-      { id: "PUE-NCX1", name: "Nuevo Necaxa (Juan Galindo)",             lat: 20.218, lon: -97.965 },
-      { id: "PUE-NCX2", name: "Huauchinango",                            lat: 20.183, lon: -98.057 },
-      { id: "HGO-TEJ1", name: "Presa El Tejocotal (Acaxochitlán)",       lat: 20.214, lon: -98.192 },
-      { id: "PUE-APU1", name: "Zacapoaxtla (Apulco)",                    lat: 19.876, lon: -97.588 },
-      { id: "PUE-LAX1", name: "Nauzontla (Laxaxalpan)",                  lat: 19.965, lon: -97.567 },
-      { id: "PUE-LAX2", name: "Zongozotla (Laxaxalpan)",                 lat: 19.980, lon: -97.663 },
+      // Veracruz (Norte & Centro)
+      { id: "VER-N01", name: "Tuxpan",               lat: 20.956,  lon: -97.406,  state: "Veracruz" },
+      { id: "VER-N02", name: "Poza Rica",            lat: 20.533,  lon: -97.459,  state: "Veracruz" },
+      { id: "VER-N03", name: "Papantla",             lat: 20.446,  lon: -97.318,  state: "Veracruz" },
+      { id: "VER-N04", name: "Tihuatlán",            lat: 20.714,  lon: -97.475,  state: "Veracruz" },
+      { id: "VER-N05", name: "Tecolutla",            lat: 20.483,  lon: -97.005,  state: "Veracruz" },
+      { id: "VER-N06", name: "Nautla",               lat: 20.215,  lon: -96.781,  state: "Veracruz" },
+      { id: "VER-N07", name: "Martínez de la Torre", lat: 20.065,  lon: -97.056,  state: "Veracruz" },
+      { id: "VER-N08", name: "Tlapacoyan",           lat: 19.973,  lon: -97.212,  state: "Veracruz" },
+      { id: "VER-N09", name: "Misantla",             lat: 19.928,  lon: -96.851,  state: "Veracruz" },
+      { id: "VER-N10", name: "Tantoyuca",            lat: 21.350,  lon: -98.225,  state: "Veracruz" },
+      { id: "VER-N11", name: "Pánuco",               lat: 22.053,  lon: -98.182,  state: "Veracruz" },
+      { id: "VER-N12", name: "Naranjos",             lat: 21.353,  lon: -97.679,  state: "Veracruz" },
+      { id: "VER-C01", name: "Xalapa",               lat: 19.5438, lon: -96.9103, state: "Veracruz" },
+      { id: "VER-C02", name: "Boca del Río",         lat: 19.106,  lon: -96.106,  state: "Veracruz" },
+      { id: "VER-C03", name: "Orizaba",              lat: 18.851,  lon: -97.099,  state: "Veracruz" },
+      { id: "VER-C04", name: "Córdoba",              lat: 18.8854, lon: -96.9310, state: "Veracruz" },
 
-      // --- Alto Tuxpan (Pantepec/Vinazco) ---
-      { id: "PUE-XIC1", name: "Xicotepec",                               lat: 20.279, lon: -97.960 },
-      { id: "PUE-PAN1", name: "Pantepec (Puebla)",                       lat: 20.456, lon: -97.615 },
-      { id: "PUE-VEC1", name: "Venustiano Carranza (Villa Lázaro Cárdenas)", lat: 20.525, lon: -97.681 },
+      // Puebla (Complejo Necaxa, Alto Tuxpan, Alto Cazones)
+      { id: "PUE-NCX1", name: "Nuevo Necaxa (Juan Galindo)",             lat: 20.218, lon: -97.965,  state: "Puebla" },
+      { id: "PUE-NCX2", name: "Huauchinango",                            lat: 20.183, lon: -98.057,  state: "Puebla" },
+      { id: "PUE-APU1", name: "Zacapoaxtla (Apulco)",                    lat: 19.876, lon: -97.588,  state: "Puebla" },
+      { id: "PUE-LAX1", name: "Nauzontla (Laxaxalpan)",                  lat: 19.965, lon: -97.567,  state: "Puebla" },
+      { id: "PUE-LAX2", name: "Zongozotla (Laxaxalpan)",                 lat: 19.980, lon: -97.663,  state: "Puebla" },
+      { id: "PUE-XIC1", name: "Xicotepec",                               lat: 20.279, lon: -97.960,  state: "Puebla" },
+      { id: "PUE-PAN1", name: "Pantepec (Puebla)",                       lat: 20.456, lon: -97.615,  state: "Puebla" },
+      { id: "PUE-VEC1", name: "Venustiano Carranza (Villa Lázaro Cárdenas)", lat: 20.525, lon: -97.681,  state: "Puebla" },
 
-      // --- Alto Cazones ---
-      { id: "PUE-ZIH1", name: "Zihuateutla",                             lat: 20.317, lon: -97.889 },
-      { id: "PUE-JOP1", name: "Jopala",                                  lat: 20.146, lon: -97.686 }
+      // Hidalgo
+      { id: "HGO-TEJ1", name: "Presa El Tejocotal (Acaxochitlán)",       lat: 20.214, lon: -98.192,  state: "Hidalgo" },
+      { id: "PUE-ZIH1", name: "Zihuateutla",                             lat: 20.317, lon: -97.889,  state: "Puebla" },
+      { id: "PUE-JOP1", name: "Jopala",                                  lat: 20.146, lon: -97.686,  state: "Puebla" }
     ];
 
     // ==============================
@@ -171,6 +175,7 @@
     const menuToggle = document.getElementById('menuToggle');
     const mainNav = document.getElementById('mainNav');
 
+    const stateSelect = document.getElementById('stateSelect');
     const locSelect = document.getElementById('locSelect');
     const locSearch = document.getElementById('locSearch');
     const locInfo   = document.getElementById('locInfo');
@@ -180,36 +185,51 @@
     // ==============================
     let currentLoc = null;
 
-    function populateSelect(list){
-      locSelect.innerHTML = '';
-      (list || LOCS).forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.id;
-        opt.textContent = `${d.name} (${d.lat.toFixed(2)}, ${d.lon.toFixed(2)})`;
-        locSelect.appendChild(opt);
-      });
+    function uniqueStates(list){
+      return Array.from(new Set(list.map(d => d.state))).sort((a,b)=>a.localeCompare(b,'es'));
     }
 
-    function loadSavedLocOrDefault(){
-      // Prioridad: ?loc= de la URL principal, luego localStorage, luego primera opción
-      const qs = new URLSearchParams(location.search);
-      const urlLoc = qs.get('loc');
-      let saved = null;
-      try { saved = JSON.parse(localStorage.getItem('wrf_current_loc')); } catch {}
-
-      if (urlLoc && LOCS.some(d => d.id === urlLoc)) {
-        currentLoc = LOCS.find(d => d.id === urlLoc);
-      } else if (saved && LOCS.some(d => d.id === saved.id)) {
-        currentLoc = LOCS.find(d => d.id === saved.id);
-      } else {
-        currentLoc = LOCS[0] || null;
+    function populateStateSelect(list){
+      const states = uniqueStates(list);
+      stateSelect.innerHTML = '';
+      const all = document.createElement('option');
+      all.value = '';
+      all.textContent = 'Todos los estados';
+      stateSelect.appendChild(all);
+      for(const st of states){
+        const opt = document.createElement('option');
+        opt.value = st; opt.textContent = st;
+        stateSelect.appendChild(opt);
       }
+      // Restaurar selección previa si aplica
+      const savedState = localStorage.getItem('wrf_current_state');
+      if(savedState && [...stateSelect.options].some(o=>o.value===savedState)){
+        stateSelect.value = savedState;
+      }
+    }
 
-      if (currentLoc){
-        locSelect.value = currentLoc.id;
-        locInfo.textContent = `${currentLoc.name} • (${currentLoc.lat.toFixed(3)}, ${currentLoc.lon.toFixed(3)})`;
-      } else {
-        locInfo.textContent = 'Sin selección';
+    function populateSelect(list){
+      // Agrupa por estado con <optgroup>
+      const byState = {};
+      (list || LOCS).forEach(d => {
+        const st = d.state || 'Sin estado';
+        byState[st] = byState[st] || [];
+        byState[st].push(d);
+      });
+      // Ordena estados y localidades por nombre
+      const stateNames = Object.keys(byState).sort((a,b)=>a.localeCompare(b,'es'));
+      locSelect.innerHTML='';
+      for(const st of stateNames){
+        const og = document.createElement('optgroup');
+        og.label = st;
+        const arr = byState[st].sort((a,b)=>a.name.localeCompare(b.name,'es'));
+        for(const d of arr){
+          const opt = document.createElement('option');
+          opt.value = d.id;
+          opt.textContent = `${d.name} (${d.lat.toFixed(2)}, ${d.lon.toFixed(2)})`;
+          og.appendChild(opt);
+        }
+        locSelect.appendChild(og);
       }
     }
 
@@ -225,9 +245,25 @@
 
     function filterLocalities(term){
       const t = term.trim().toLowerCase();
-      if(!t) return LOCS;
-      return LOCS.filter(d => d.name.toLowerCase().includes(t) || d.id.toLowerCase().includes(t));
+      const st = stateSelect.value; // '' = todos
+      return LOCS.filter(d =>
+        (st ? d.state === st : true) && (
+          !t || d.name.toLowerCase().includes(t) || d.id.toLowerCase().includes(t)
+        )
+      );
     }
+
+    stateSelect.addEventListener('change', () => {
+      localStorage.setItem('wrf_current_state', stateSelect.value);
+      const filtered = filterLocalities(locSearch.value);
+      populateSelect(filtered);
+      if(filtered.length && (!currentLoc || !filtered.some(d => d.id === currentLoc.id))){
+        setCurrentLocById(filtered[0].id);
+      } else {
+        // solo re-render del iframe activo para propagar estado si no cambió loc
+        refreshActiveIframe();
+      }
+    });
 
     locSearch.addEventListener('input', () => {
       const filtered = filterLocalities(locSearch.value);
@@ -294,6 +330,7 @@
     // 4) Init
     // ==============================
     (function init(){
+      populateStateSelect(LOCS);
       populateSelect(LOCS);
       loadSavedLocOrDefault();
       if(buttons.length){
