@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Meteograma</title>
+  <style>
+    body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Inter, sans-serif;background:#fff;color:#111}
+    main{display:flex;justify-content:center;align-items:flex-start;padding:.75rem}
+    img{max-width:100%;height:auto;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+    .msg{padding:1rem;color:#475569}
+  </style>
+</head>
+<body>
+  <main>
+    <div id="wrap">
+      <div class="msg" id="msg">Cargando…</div>
+      <img id="plot" alt="Meteograma" style="display:none" />
+    </div>
+  </main>
+  <script>
+    const qs  = new URLSearchParams(location.search);
+    const loc = qs.get('loc'); // ej: VER-C01
+
+    const img = document.getElementById('plot');
+    const msg = document.getElementById('msg');
+
+    if(!loc){
+      msg.textContent = 'Falta el parámetro ?loc= (ej. ?loc=VER-C01)';
+    }else{
+      // Construye el nombre exacto del PNG que generaste en Paso 1
+      const src = `meteogramas_prcp/prcp_${loc}.png?v=${Date.now()}`; // cache-busting
+      img.onload = () => { msg.style.display='none'; img.style.display='block'; };
+      img.onerror = () => { msg.textContent = `No encontré ${src}`; };
+      img.src = src;
+    }
+  </script>
+</body>
+</html>
+
