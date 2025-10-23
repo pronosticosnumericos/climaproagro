@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pronósticos Numéricos | Weather Research & Forecast</title>
+  <meta name="description" content="Pronósticos detallados del modelo WRF para México, Golfo de México y Pacífico Oriental con resolución de 15 km: precipitación, temperatura, viento y humedad." />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Pronósticos WRF 7 días" />
+  <meta property="og:description" content="Modelos de predicción WRF: precipitación, temperatura, viento y humedad para México y regiones aledañas." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://tusitio.com" />
+  <meta property="og:image" content="og-image.png" />
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root{
+      --color-bg:#f9fafb;--color-primary:#1d4ed8;--color-primary-dark:#1e40af;
+      --color-accent:#2563eb;--color-text:#111827;--color-muted:#6b7280;
+      --spacing:1rem;--radius:0.5rem;--transition-speed:0.3s
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100vh;overflow:hidden;display:flex;flex-direction:column}
+    body{font-family:'Inter',system-ui, -apple-system, Segoe UI, Roboto, sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.6}
+    a:focus,button:focus,select:focus,input:focus{outline:2px dashed var(--color-primary-dark);outline-offset:2px}
+
+    /* Header */
+    header[role="banner"]{background:var(--color-primary);color:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1);flex-shrink:0}
+    header .container{max-width:1200px;margin:auto;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:var(--spacing)}
+    header h1{font-weight:700;font-size:1.75rem}
+    header p{font-weight:400;font-size:.875rem;color:#e0e7ff;flex:1}
+    #menuToggle{display:none;background:none;border:none;font-size:1.5rem;color:#fff;cursor:pointer}
+
+    /* Control bar (selector) */
+    .controls{background:#fff;border-bottom:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-shrink:0;display:none}
+    .controls .container{max-width:1200px;margin:auto;padding:.6rem 1rem;display:grid;grid-template-columns:1.2fr 1fr auto;gap:.5rem;align-items:center}
+    .field{display:flex;gap:.5rem;align-items:center}
+    .field label{font-weight:600;font-size:.9rem}
+    .field input[type="text"], .field select{flex:1;padding:.5rem .6rem;border:1px solid #e5e7eb;border-radius:var(--radius);background:#fff}
+    .chip{justify-self:end;background:#eef2ff;color:#3730a3;padding:.4rem .6rem;border-radius:999px;font-size:.8rem}
+
+    /* Navigation (tabs) */
+    nav[role="navigation"]{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1);flex-shrink:0}
+    #mainNav{max-width:1200px;margin:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:.25rem .5rem;padding:.25rem 1rem}
+    .tab-button{padding:.4rem .8rem;font-size:.9rem;font-weight:600;background:var(--color-accent);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;transition:background var(--transition-speed)}
+    .tab-button:hover,.tab-button.active{background:var(--color-primary-dark)}
+
+    /* Main & frames */
+    main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    #iframeContainer{flex:1;margin:0;width:100%;max-width:none;border-radius:0;box-shadow:none;overflow:auto;display:flex;flex-direction:column}
+    .tab-content{flex:1;width:100%;border:none;opacity:0;transition:opacity var(--transition-speed) ease-in-out;display:none;height:100% !important}
+    .tab-content.active{display:block;opacity:1}
+
+    /* Footer */
+    footer[role="contentinfo"]{text-align:center;padding:2rem 1rem;font-size:1rem;color:var(--color-muted);background:#fff;box-shadow:0 -1px 3px rgba(0,0,0,.1);flex-shrink:0}
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .controls .container{grid-template-columns:1fr}
+      .chip{justify-self:start}
+    }
+    @media (max-width: 768px){
+      #menuToggle{display:block}
+      header p{display:none}
+      #mainNav{display:none;flex-direction:column;padding:0}
+      #mainNav.open{display:flex}
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <div class="container">
+      <h1>Pronósticos Numéricos</h1>
+      <p>Pronósticos del modelo WRF para los próximos 7 días — Cobertura: México, Golfo de México y Pacífico Oriental — Resolución: 15 km</p>
+      <button id="menuToggle" aria-label="Mostrar menú" aria-controls="mainNav" aria-expanded="false">☰</button>
+    </div>
+  </header>
+
+  <!-- Barra de control: búsqueda + selector de localidad (solo visible en Meteograma) -->
+  <section class="controls" aria-label="Selector de localidad">
+    <div class="container">
+      <div class="field">
+        <label for="locSearch">Buscar:</label>
+        <input id="locSearch" type="text" placeholder="Escribe municipio/localidad… (filtra la lista)" />
+      </div>
+      <div class="field">
+        <label for="stateSelect">Estado:</label>
+        <select id="stateSelect" aria-label="Estado"></select>
+      </div>
+      <div class="field">
+        <label for="locSelect">Localidad:</label>
+        <select id="locSelect" aria-label="Localidad o municipio de interés"></select>
+      </div>
+      <span class="chip" id="locInfo">Sin selección</span>
+    </div>
+  </section>
+
+  <nav role="navigation" id="mainNav" aria-label="Pestañas de pronóstico">
+    <button class="tab-button" data-tab="precipitacion.html" role="tab">Precipitación hora</button>
+    <button class="tab-button" data-tab="precipitacionacumulada.html" role="tab">Prec. acumulada</button>
+    <button class="tab-button" data-tab="precipitacionacumulada24h.html" role="tab">Prec. 24 h</button>
+    <button class="tab-button" data-tab="temperatura.html" role="tab">Temperatura</button>
+    <button class="tab-button" data-tab="viento.html" role="tab">Viento</button>
+    <button class="tab-button" data-tab="humedadrelativa.html" role="tab">Humedad rel.</button>
+    <button class="tab-button" data-tab="saffirsimpson.html" role="tab">Saffir-Simpson</button>
+    <button class="tab-button" data-tab="meteograma.html" role="tab">Meteograma</button>
+  </nav>
+
+  <main>
+    <section id="iframeContainer">
+      <!-- Dejamos src vacío; se inyecta dinámicamente con ?loc=lat,lon -->
+      <iframe src="" class="tab-content" data-tab="precipitacion.html" allowfullscreen></iframe>
+      <iframe src="" class="tab-content" data-tab="precipitacionacumulada.html" allowfullscreen></iframe>
+      <iframe src="" class="tab-content" data-tab="precipitacionacumulada24h.html" allowfullscreen></iframe>
+      <iframe src="" class="tab-content" data-tab="temperatura.html" allowfullscreen></iframe>
+      <iframe src="" class="tab-content" data-tab="viento.html" allowfullscreen></iframe>
+      <iframe src="" class="tab-content" data-tab="humedadrelativa.html" allowfullscreen></iframe>
+      <iframe src="" class="tab-content" data-tab="saffirsimpson.html" allowfullscreen></iframe>
+      <iframe src="" class="tab-content" data-tab="meteograma.html" allowfullscreen></iframe>
+    </section>
+  </main>
+
+  <footer role="contentinfo">&copy; 2025 Weather Research & Forecast</footer>
+
+  <script>
+    // ==============================
+    // 0) Catálogo de localidades (reemplaza con tu lista real)
+    // ==============================
+    const LOCS = [
+      // Veracruz (Norte & Centro)
+      { id: "VER-N01", name: "Tuxpan",               lat: 20.956,  lon: -97.406,  state: "Veracruz" },
+      { id: "VER-N02", name: "Poza Rica",            lat: 20.533,  lon: -97.459,  state: "Veracruz" },
+      { id: "VER-N03", name: "Papantla",             lat: 20.446,  lon: -97.318,  state: "Veracruz" },
+      { id: "VER-N04", name: "Tihuatlán",            lat: 20.714,  lon: -97.475,  state: "Veracruz" },
+      { id: "VER-N05", name: "Tecolutla",            lat: 20.483,  lon: -97.005,  state: "Veracruz" },
+      { id: "VER-N06", name: "Nautla",               lat: 20.215,  lon: -96.781,  state: "Veracruz" },
+      { id: "VER-N07", name: "Martínez de la Torre", lat: 20.065,  lon: -97.056,  state: "Veracruz" },
+      { id: "VER-N08", name: "Tlapacoyan",           lat: 19.973,  lon: -97.212,  state: "Veracruz" },
+      { id: "VER-N09", name: "Misantla",             lat: 19.928,  lon: -96.851,  state: "Veracruz" },
+      { id: "VER-N10", name: "Tantoyuca",            lat: 21.350,  lon: -98.225,  state: "Veracruz" },
+      { id: "VER-N11", name: "Pánuco",               lat: 22.053,  lon: -98.182,  state: "Veracruz" },
+      { id: "VER-N12", name: "Naranjos",             lat: 21.353,  lon: -97.679,  state: "Veracruz" },
+      { id: "VER-C01", name: "Xalapa",               lat: 19.5438, lon: -96.9103, state: "Veracruz" },
+      { id: "VER-C02", name: "Boca del Río",         lat: 19.106,  lon: -96.106,  state: "Veracruz" },
+      { id: "VER-C03", name: "Orizaba",              lat: 18.851,  lon: -97.099,  state: "Veracruz" },
+      { id: "VER-C04", name: "Córdoba",              lat: 18.8854, lon: -96.9310, state: "Veracruz" },
+
+      // Puebla (Complejo Necaxa, Alto Tuxpan, Alto Cazones)
+      { id: "PUE-NCX1", name: "Nuevo Necaxa (Juan Galindo)",             lat: 20.218, lon: -97.965,  state: "Puebla" },
+      { id: "PUE-NCX2", name: "Huauchinango",                            lat: 20.183, lon: -98.057,  state: "Puebla" },
+      { id: "PUE-APU1", name: "Zacapoaxtla (Apulco)",                    lat: 19.876, lon: -97.588,  state: "Puebla" },
+      { id: "PUE-LAX1", name: "Nauzontla (Laxaxalpan)",                  lat: 19.965, lon: -97.567,  state: "Puebla" },
+      { id: "PUE-LAX2", name: "Zongozotla (Laxaxalpan)",                 lat: 19.980, lon: -97.663,  state: "Puebla" },
+      { id: "PUE-XIC1", name: "Xicotepec",                               lat: 20.279, lon: -97.960,  state: "Puebla" },
+      { id: "PUE-PAN1", name: "Pantepec (Puebla)",                       lat: 20.456, lon: -97.615,  state: "Puebla" },
+      { id: "PUE-VEC1", name: "Venustiano Carranza (Villa Lázaro Cárdenas)", lat: 20.525, lon: -97.681,  state: "Puebla" },
+
+      // Hidalgo
+      { id: "HGO-TEJ1", name: "Presa El Tejocotal (Acaxochitlán)",       lat: 20.214, lon: -98.192,  state: "Hidalgo" },
+      { id: "PUE-ZIH1", name: "Zihuateutla",                             lat: 20.317, lon: -97.889,  state: "Puebla" },
+      { id: "PUE-JOP1", name: "Jopala",                                  lat: 20.146, lon: -97.686,  state: "Puebla" }
+    ];
+
+    // ==============================
+    // 1) DOM refs
+    // ==============================
+    const buttons = document.querySelectorAll('.tab-button');
+    const frames  = document.querySelectorAll('.tab-content');
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    const stateSelect = document.getElementById('stateSelect');
+    const locSelect = document.getElementById('locSelect');
+    const locSearch = document.getElementById('locSearch');
+    const locInfo   = document.getElementById('locInfo');
+
+    // ==============================
+    // 2) Estado de localidad
+    // ==============================
+    let currentLoc = null;
+
+    function uniqueStates(list){
+      return Array.from(new Set(list.map(d => d.state))).sort((a,b)=>a.localeCompare(b,'es'));
+    }
+
+    function populateStateSelect(list){
+      const states = uniqueStates(list);
+      stateSelect.innerHTML = '';
+      const all = document.createElement('option');
+      all.value = '';
+      all.textContent = 'Todos los estados';
+      stateSelect.appendChild(all);
+      for(const st of states){
+        const opt = document.createElement('option');
+        opt.value = st; opt.textContent = st;
+        stateSelect.appendChild(opt);
+      }
+      // Restaurar selección previa si aplica
+      const savedState = localStorage.getItem('wrf_current_state');
+      if(savedState && [...stateSelect.options].some(o=>o.value===savedState)){
+        stateSelect.value = savedState;
+      }
+    }
+
+    function populateSelect(list){
+      // Agrupa por estado con <optgroup>
+      const byState = {};
+      (list || LOCS).forEach(d => {
+        const st = d.state || 'Sin estado';
+        byState[st] = byState[st] || [];
+        byState[st].push(d);
+      });
+      // Ordena estados y localidades por nombre
+      const stateNames = Object.keys(byState).sort((a,b)=>a.localeCompare(b,'es'));
+      locSelect.innerHTML='';
+      for(const st of stateNames){
+        const og = document.createElement('optgroup');
+        og.label = st;
+        const arr = byState[st].sort((a,b)=>a.name.localeCompare(b.name,'es'));
+        for(const d of arr){
+          const opt = document.createElement('option');
+          opt.value = d.id;
+          opt.textContent = `${d.name} (${d.lat.toFixed(2)}, ${d.lon.toFixed(2)})`;
+          og.appendChild(opt);
+        }
+        locSelect.appendChild(og);
+      }
+    }
+
+    function filterLocalities(term){
+      const t = term.trim().toLowerCase();
+      const st = stateSelect.value; // '' = todos
+      return LOCS.filter(d =>
+        (st ? d.state === st : true) && (
+          !t || d.name.toLowerCase().includes(t) || d.id.toLowerCase().includes(t)
+        )
+      );
+    }
+
+    function setCurrentLocById(id){
+      const found = LOCS.find(d => d.id === id);
+      if(found){
+        currentLoc = found;
+        localStorage.setItem('wrf_current_loc', JSON.stringify(found));
+        locInfo.textContent = `${found.name} • (${found.lat.toFixed(3)}, ${found.lon.toFixed(3)})`;
+        refreshActiveIframe();
+      }
+    }
+
+    function loadSavedLocOrDefault(){
+      const qs = new URLSearchParams(location.search);
+      const urlLoc = qs.get('loc');
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem('wrf_current_loc')); } catch {}
+
+      let cand = null;
+      if (urlLoc && LOCS.some(d => d.id === urlLoc)) {
+        cand = LOCS.find(d => d.id === urlLoc);
+      } else if (saved && LOCS.some(d => d.id === saved.id)) {
+        cand = LOCS.find(d => d.id === saved.id);
+      } else {
+        const filtered = filterLocalities(locSearch.value || '');
+        cand = filtered[0] || LOCS[0] || null;
+      }
+
+      if (cand) {
+        currentLoc = cand;
+        // Alinear estado visual con la localidad elegida
+        if (stateSelect && stateSelect.value && stateSelect.value !== cand.state) {
+          stateSelect.value = cand.state;
+          populateSelect(filterLocalities(locSearch.value || ''));
+        } else {
+          populateSelect(filterLocalities(locSearch.value || ''));
+        }
+        if (locSelect) locSelect.value = cand.id;
+        locInfo.textContent = `${cand.name} • (${cand.lat.toFixed(3)}, ${cand.lon.toFixed(3)})`;
+        localStorage.setItem('wrf_current_loc', JSON.stringify(cand));
+      }
+    }
+
+    stateSelect.addEventListener('change', () => {
+      localStorage.setItem('wrf_current_state', stateSelect.value);
+      const filtered = filterLocalities(locSearch.value);
+      populateSelect(filtered);
+      if(filtered.length && (!currentLoc || !filtered.some(d => d.id === currentLoc.id))){
+        setCurrentLocById(filtered[0].id);
+      } else {
+        refreshActiveIframe();
+      }
+    });
+
+    locSearch.addEventListener('input', () => {
+      const filtered = filterLocalities(locSearch.value);
+      populateSelect(filtered);
+      if(filtered.length && (!currentLoc || !filtered.some(d => d.id === currentLoc.id))){
+        setCurrentLocById(filtered[0].id);
+      }
+    });
+
+    locSelect.addEventListener('change', () => setCurrentLocById(locSelect.value));
+
+    // ==============================
+    // 3) Tabs + iframes con parámetros loc/lat/lon
+    // ==============================
+    function withLocParams(baseSrc){
+      if(!currentLoc) return new URL(baseSrc, window.location.href).toString();
+      const url = new URL(baseSrc, window.location.href);
+      url.searchParams.set('loc', currentLoc.id);
+      url.searchParams.set('lat', currentLoc.lat);
+      url.searchParams.set('lon', currentLoc.lon);
+      return url.toString();
+    }
+
+    function activateTab(tabSrc){
+      // Marcar botón activo
+      buttons.forEach(btn => {
+        const isActive = btn.getAttribute('data-tab') === tabSrc;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive);
+      });
+      // Mostrar sólo el iframe activo y cargar su src con params
+      frames.forEach(frame => {
+        const match = frame.getAttribute('data-tab') === tabSrc;
+        frame.classList.toggle('active', match);
+        if(match){
+          const nextUrl = withLocParams(tabSrc);
+          if(frame.src !== nextUrl) frame.src = nextUrl;
+        }
+      });
+      // Mostrar controles SOLO en la pestaña Meteograma
+      const controls = document.querySelector('.controls');
+      if (controls){
+        controls.style.display = (tabSrc === 'meteograma.html') ? 'block' : 'none';
+      }
+    }
+
+    function refreshActiveIframe(){
+      const activeBtn = [...buttons].find(b => b.classList.contains('active')) || buttons[0];
+      const tabSrc = activeBtn ? activeBtn.getAttribute('data-tab') : buttons[0].getAttribute('data-tab');
+      activateTab(tabSrc);
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        activateTab(btn.getAttribute('data-tab'));
+        if(mainNav.classList.contains('open')){
+          mainNav.classList.remove('open');
+          menuToggle.setAttribute('aria-expanded', false);
+        }
+      });
+    });
+
+    // Menú móvil
+    menuToggle.addEventListener('click', () => {
+      const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
+      menuToggle.setAttribute('aria-expanded', !expanded);
+      mainNav.classList.toggle('open');
+    });
+
+    // ==============================
+    // 4) Init
+    // ==============================
+    (function init(){
+      populateStateSelect(LOCS);
+      populateSelect(LOCS);
+      loadSavedLocOrDefault();
+      if(buttons.length){
+        const firstTab = buttons[0].getAttribute('data-tab');
+        activateTab(firstTab);
+      }
+      // Visibilidad correcta de controles según tab activo
+      const controls = document.querySelector('.controls');
+      const activeBtn = document.querySelector('.tab-button.active');
+      const activeTab = activeBtn ? activeBtn.getAttribute('data-tab') : (buttons[0]?.getAttribute('data-tab') || '');
+      if (controls) controls.style.display = (activeTab === 'meteograma.html') ? 'block' : 'none';
+    })();
+
+    // ==============================
+    // 5) Self-tests mínimos (en consola)
+    // ==============================
+    (function selfTests(){
+      try {
+        console.assert(menuToggle instanceof HTMLElement, 'menuToggle no está disponible');
+        console.assert(buttons.length > 0, 'No hay pestañas (.tab-button)');
+        console.assert(frames.length > 0, 'No hay iframes (.tab-content)');
+        console.assert(document.getElementById('locSelect') !== null, 'Falta #locSelect');
+        console.assert(document.getElementById('locSearch') !== null, 'Falta #locSearch');
+        const controls = document.querySelector('.controls');
+        const activeBtn = document.querySelector('.tab-button.active');
+        const activeTab = activeBtn ? activeBtn.getAttribute('data-tab') : '';
+        if (activeTab && activeTab !== 'meteograma.html') {
+          console.assert(getComputedStyle(controls).display === 'none', 'Controles deberían iniciar ocultos fuera de Meteograma');
+        }
+        // Verifica que el iframe activo tenga src asignado
+        const activeFrame = [...frames].find(f => f.classList.contains('active'));
+        console.assert(activeFrame && activeFrame.src && activeFrame.src.length > 0, 'El iframe activo no tiene src');
+      } catch(e) {
+        console.warn('Self-tests: ', e);
+      }
+    })();
+  </script>
+</body>
+</html>
+
